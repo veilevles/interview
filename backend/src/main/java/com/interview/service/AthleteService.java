@@ -6,7 +6,10 @@ import java.util.Optional;
 
 public interface AthleteService {
     List<Athlete> findAll();
+
     Optional<Athlete> findById(Long id);
+
     Athlete save(Athlete athlete);
+
     void deleteById(Long id);
 }

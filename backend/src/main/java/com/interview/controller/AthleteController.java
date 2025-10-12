@@ -2,10 +2,10 @@ package com.interview.controller;
 
 import com.interview.model.Athlete;
 import com.interview.service.AthleteService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/athletes")
@@ -32,10 +32,7 @@ public class AthleteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Athlete> updateAthlete(
-            @PathVariable Long id,
-            @RequestBody Athlete updatedAthlete
-    ) {
+    public ResponseEntity<Athlete> updateAthlete(@PathVariable Long id, @RequestBody Athlete updatedAthlete) {
         return service.findById(id)
                 .map(existing -> {
                     existing.setFirstName(updatedAthlete.getFirstName());
