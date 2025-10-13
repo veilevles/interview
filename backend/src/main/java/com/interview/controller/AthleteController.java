@@ -21,9 +21,8 @@ public class AthleteController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Athlete> getAthleteById(@PathVariable Long id) {
-        return service.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Athlete athlete = service.findById(id); // Will throw AthleteNotFoundException if not found
+        return ResponseEntity.ok(athlete);
     }
 
     @PostMapping
@@ -33,18 +32,17 @@ public class AthleteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Athlete> updateAthlete(@PathVariable Long id, @RequestBody Athlete updatedAthlete) {
-        return service.findById(id)
-                .map(existing -> {
-                    existing.setFirstName(updatedAthlete.getFirstName());
-                    existing.setLastName(updatedAthlete.getLastName());
-                    existing.setBirthTimestamp(updatedAthlete.getBirthTimestamp());
-                    existing.setNationality(updatedAthlete.getNationality());
-                    existing.setDiscipline(updatedAthlete.getDiscipline());
-                    existing.setPersonalBest(updatedAthlete.getPersonalBest());
-                    existing.setBio(updatedAthlete.getBio());
-                    return ResponseEntity.ok(service.save(existing));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Athlete existing = service.findById(id); // Will throw AthleteNotFoundException if not found
+
+        existing.setFirstName(updatedAthlete.getFirstName());
+        existing.setLastName(updatedAthlete.getLastName());
+        existing.setBirthTimestamp(updatedAthlete.getBirthTimestamp());
+        existing.setNationality(updatedAthlete.getNationality());
+        existing.setDiscipline(updatedAthlete.getDiscipline());
+        existing.setPersonalBest(updatedAthlete.getPersonalBest());
+        existing.setBio(updatedAthlete.getBio());
+
+        return ResponseEntity.ok(service.save(existing));
     }
 
     @DeleteMapping("/{id}")

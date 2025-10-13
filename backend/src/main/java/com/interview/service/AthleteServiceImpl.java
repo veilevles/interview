@@ -1,9 +1,9 @@
 package com.interview.service;
 
+import com.interview.exception.AthleteNotFoundException;
 import com.interview.model.Athlete;
 import com.interview.repository.AthleteRepository;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +19,8 @@ public class AthleteServiceImpl implements AthleteService {
     }
 
     @Override
-    public Optional<Athlete> findById(Long id) {
-        return repository.findById(id);
+    public Athlete findById(Long id) {
+        return repository.findById(id).orElseThrow(() -> new AthleteNotFoundException(id));
     }
 
     @Override
