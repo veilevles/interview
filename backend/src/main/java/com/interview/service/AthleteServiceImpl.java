@@ -5,6 +5,9 @@ import com.interview.model.Athlete;
 import com.interview.repository.AthleteRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,6 +19,11 @@ public class AthleteServiceImpl implements AthleteService {
     @Override
     public List<Athlete> findAll() {
         return repository.findAll();
+    }
+
+    @Override
+    public Page<Athlete> findAll(Specification<Athlete> spec, Pageable pageable) {
+        return repository.findAll(spec, pageable);
     }
 
     @Override
