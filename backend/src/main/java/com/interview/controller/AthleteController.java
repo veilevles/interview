@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -83,19 +84,30 @@ public class AthleteController {
         return ResponseEntity.ok(toPagedResponse(athletePage));
     }
 
+    @Operation(summary = "Get athlete by ID", description = "Retrieves a specific athlete by their unique identifier")
+    @ApiResponse(responseCode = "200", description = "Athlete found")
+    @ApiResponse(responseCode = "404", description = "Athlete not found")
     @GetMapping("/{id}")
     public ResponseEntity<Athlete> getAthleteById(@PathVariable Long id) {
         Athlete athlete = service.findById(id); // May throw AthleteNotFoundException
         return ResponseEntity.ok(athlete);
     }
 
+    @Operation(summary = "Create a new athlete", description = "Creates a new athlete with the provided data")
+    @ApiResponse(responseCode = "200", description = "Athlete created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid athlete data")
     @PostMapping
-    public ResponseEntity<Athlete> createAthlete(@RequestBody Athlete athlete) {
+    public ResponseEntity<Athlete> createAthlete(@Valid @RequestBody Athlete athlete) {
+        athlete.setId(null); // Ensure ID is null for new entities
         return ResponseEntity.ok(service.save(athlete));
     }
 
+    @Operation(summary = "Update an athlete", description = "Updates an existing athlete with the provided data")
+    @ApiResponse(responseCode = "200", description = "Athlete updated successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid athlete data")
+    @ApiResponse(responseCode = "404", description = "Athlete not found")
     @PutMapping("/{id}")
-    public ResponseEntity<Athlete> updateAthlete(@PathVariable Long id, @RequestBody Athlete updatedAthlete) {
+    public ResponseEntity<Athlete> updateAthlete(@PathVariable Long id, @Valid @RequestBody Athlete updatedAthlete) {
         Athlete existing = service.findById(id); // May throw AthleteNotFoundException
 
         existing.setFirstName(updatedAthlete.getFirstName());
@@ -109,6 +121,8 @@ public class AthleteController {
         return ResponseEntity.ok(service.save(existing));
     }
 
+    @Operation(summary = "Delete an athlete", description = "Deletes an athlete by their unique identifier")
+    @ApiResponse(responseCode = "204", description = "Athlete deleted successfully")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAthlete(@PathVariable Long id) {
         service.deleteById(id);
