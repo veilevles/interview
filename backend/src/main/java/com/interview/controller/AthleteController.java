@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package com.interview.controller;
 
+import com.interview.dto.AthleteMapper;
+import com.interview.dto.AthleteRequest;
+import com.interview.dto.AthleteResponse;
 import com.interview.dto.PagedResponse;
 import com.interview.model.Athlete;
 import com.interview.repository.AthleteSpecification;
@@ -47,7 +50,7 @@ public class AthleteController {
             description = "Successfully retrieved athletes",
             content = @Content(schema = @Schema(implementation = PagedResponse.class)))
     @GetMapping
-    public ResponseEntity<?> getAllAthletes(
+    public ResponseEntity<PagedResponse<AthleteResponse>> getAllAthletes(
             @Parameter(description = "Filter by nationality (case-insensitive partial match)", example = "USA")
                     @RequestParam(required = false)
                     String nationality,
@@ -72,14 +75,14 @@ public class AthleteController {
             @Parameter(description = "Sort direction", example = "ASC") @RequestParam(defaultValue = "ASC")
                     String direction) {
 
-        Specification<Athlete> spec = buildSpecification(nationality, discipline, search);
+        final Specification<Athlete> spec = buildSpecification(nationality, discipline, search);
 
         // Validate sort field
-        String sortField = ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : DEFAULT_SORT_FIELD;
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        final String sortField = ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : DEFAULT_SORT_FIELD;
+        final Sort.Direction sortDirection = direction.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortField));
-        Page<Athlete> athletePage = service.findAll(spec, pageable);
+        final Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortField));
+        final Page<Athlete> athletePage = service.findAll(spec, pageable);
 
         return ResponseEntity.ok(toPagedResponse(athletePage));
     }
@@ -88,18 +91,19 @@ public class AthleteController {
     @ApiResponse(responseCode = "200", description = "Athlete found")
     @ApiResponse(responseCode = "404", description = "Athlete not found")
     @GetMapping("/{id}")
-    public ResponseEntity<Athlete> getAthleteById(@PathVariable Long id) {
-        Athlete athlete = service.findById(id); // May throw AthleteNotFoundException
-        return ResponseEntity.ok(athlete);
+    public ResponseEntity<AthleteResponse> getAthleteById(@PathVariable Long id) {
+        final Athlete athlete = service.findById(id); // May throw AthleteNotFoundException
+        return ResponseEntity.ok(AthleteMapper.toResponse(athlete));
     }
 
     @Operation(summary = "Create a new athlete", description = "Creates a new athlete with the provided data")
     @ApiResponse(responseCode = "200", description = "Athlete created successfully")
     @ApiResponse(responseCode = "400", description = "Invalid athlete data")
     @PostMapping
-    public ResponseEntity<Athlete> createAthlete(@Valid @RequestBody Athlete athlete) {
-        athlete.setId(null); // Ensure ID is null for new entities
-        return ResponseEntity.ok(service.save(athlete));
+    public ResponseEntity<AthleteResponse> createAthlete(@Valid @RequestBody AthleteRequest request) {
+        final Athlete athlete = AthleteMapper.toDomain(request);
+        final Athlete saved = service.save(athlete);
+        return ResponseEntity.ok(AthleteMapper.toResponse(saved));
     }
 
     @Operation(summary = "Update an athlete", description = "Updates an existing athlete with the provided data")
@@ -107,18 +111,11 @@ public class AthleteController {
     @ApiResponse(responseCode = "400", description = "Invalid athlete data")
     @ApiResponse(responseCode = "404", description = "Athlete not found")
     @PutMapping("/{id}")
-    public ResponseEntity<Athlete> updateAthlete(@PathVariable Long id, @Valid @RequestBody Athlete updatedAthlete) {
-        Athlete existing = service.findById(id); // May throw AthleteNotFoundException
-
-        existing.setFirstName(updatedAthlete.getFirstName());
-        existing.setLastName(updatedAthlete.getLastName());
-        existing.setBirthTimestamp(updatedAthlete.getBirthTimestamp());
-        existing.setNationality(updatedAthlete.getNationality());
-        existing.setDiscipline(updatedAthlete.getDiscipline());
-        existing.setPersonalBest(updatedAthlete.getPersonalBest());
-        existing.setBio(updatedAthlete.getBio());
-
-        return ResponseEntity.ok(service.save(existing));
+    public ResponseEntity<AthleteResponse> updateAthlete(@PathVariable Long id, @Valid @RequestBody AthleteRequest request) {
+        final Athlete existing = service.findById(id); // May throw AthleteNotFoundException
+        AthleteMapper.updateFromRequest(existing, request);
+        final Athlete updated = service.save(existing);
+        return ResponseEntity.ok(AthleteMapper.toResponse(updated));
     }
 
     @Operation(summary = "Delete an athlete", description = "Deletes an athlete by their unique identifier")
@@ -148,9 +145,9 @@ public class AthleteController {
         return spec;
     }
 
-    private PagedResponse<Athlete> toPagedResponse(final Page<Athlete> page) {
+    private PagedResponse<AthleteResponse> toPagedResponse(final Page<Athlete> page) {
         return new PagedResponse<>(
-                page.getContent(),
+                page.getContent().stream().map(AthleteMapper::toResponse).toList(),
                 page.getNumber(),
                 page.getSize(),
                 page.getTotalElements(),
