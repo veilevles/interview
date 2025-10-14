@@ -5,11 +5,13 @@ import com.interview.model.Athlete;
 import com.interview.repository.AthleteRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AthleteServiceImpl implements AthleteService {
@@ -18,26 +20,71 @@ public class AthleteServiceImpl implements AthleteService {
 
     @Override
     public List<Athlete> findAll() {
-        return repository.findAll();
+        log.debug("Fetching all athletes");
+        final List<Athlete> athletes = repository.findAll();
+        log.info("Retrieved {} athletes", athletes.size());
+        return athletes;
     }
 
     @Override
-    public Page<Athlete> findAll(Specification<Athlete> spec, Pageable pageable) {
-        return repository.findAll(spec, pageable);
+    public Page<Athlete> findAll(final Specification<Athlete> spec, final Pageable pageable) {
+        log.debug(
+                "Fetching athletes with filters and pagination: page={}, size={}",
+                pageable.getPageNumber(),
+                pageable.getPageSize());
+        final Page<Athlete> athletePage = repository.findAll(spec, pageable);
+        log.info(
+                "Retrieved {} athletes matching filters (page {} of {})",
+                athletePage.getNumberOfElements(),
+                pageable.getPageNumber() + 1,
+                athletePage.getTotalPages());
+        return athletePage;
     }
 
     @Override
-    public Athlete findById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new AthleteNotFoundException(id));
+    public Athlete findById(final Long id) {
+        log.debug("Fetching athlete with id: {}", id);
+        return repository
+                .findById(id)
+                .map(athlete -> {
+                    log.info("Found athlete: id={}, name={} {}", id, athlete.getFirstName(), athlete.getLastName());
+                    return athlete;
+                })
+                .orElseThrow(() -> {
+                    log.warn("Athlete not found with id: {}", id);
+                    return new AthleteNotFoundException(id);
+                });
     }
 
     @Override
-    public Athlete save(Athlete athlete) {
-        return repository.save(athlete);
+    public Athlete save(final Athlete athlete) {
+        final boolean isNewAthlete = athlete.getId() == null;
+        if (isNewAthlete) {
+            log.debug("Creating new athlete: {} {}", athlete.getFirstName(), athlete.getLastName());
+        } else {
+            log.debug("Updating athlete with id: {}", athlete.getId());
+        }
+
+        final Athlete saved = repository.save(athlete);
+
+        if (isNewAthlete) {
+            log.info(
+                    "Created new athlete: id={}, name={} {}", saved.getId(), saved.getFirstName(), saved.getLastName());
+        } else {
+            log.info("Updated athlete: id={}, name={} {}", saved.getId(), saved.getFirstName(), saved.getLastName());
+        }
+
+        return saved;
     }
 
     @Override
-    public void deleteById(Long id) {
-        repository.deleteById(id);
+    public void deleteById(final Long id) {
+        log.debug("Attempting to delete athlete with id: {}", id);
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+            log.info("Deleted athlete with id: {}", id);
+        } else {
+            log.warn("Attempted to delete non-existent athlete with id: {}", id);
+        }
     }
 }
