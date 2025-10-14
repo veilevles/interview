@@ -5,7 +5,12 @@ import com.interview.dto.PagedResponse;
 import com.interview.model.Athlete;
 import com.interview.repository.AthleteSpecification;
 import com.interview.service.AthleteService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -16,9 +21,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller for athlete resources.
+ */
 @RestController
 @RequestMapping("/api/v1/athletes")
 @RequiredArgsConstructor
+@Tag(name = "Athletes", description = "Athlete management API with filtering, pagination, and sorting")
 public class AthleteController {
 
     private static final int MAX_SIZE = 100;
@@ -28,6 +37,14 @@ public class AthleteController {
 
     private final AthleteService service;
 
+    @Operation(
+            summary = "Get all athletes",
+            description = "Retrieves a paginated list of athletes with optional filtering and sorting. "
+                    + "Supports filtering by nationality, discipline, and name search.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved athletes",
+            content = @Content(schema = @Schema(implementation = PagedResponse.class)))
     @GetMapping
     public ResponseEntity<?> getAllAthletes(
             @Parameter(description = "Filter by nationality (case-insensitive partial match)", example = "USA")
