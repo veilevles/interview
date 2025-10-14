@@ -1,9 +1,13 @@
 package com.interview.dto;
 
 import com.interview.model.Athlete;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 /**
  * Mapper for converting between Athlete domain model and DTOs.
+ * Handles conversion between LocalDate (API) and Long timestamp (database).
  */
 public class AthleteMapper {
 
@@ -17,7 +21,7 @@ public class AthleteMapper {
         return Athlete.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .birthTimestamp(request.getBirthTimestamp())
+                .birthTimestamp(toTimestamp(request.getBirthDate()))
                 .nationality(request.getNationality())
                 .discipline(request.getDiscipline())
                 .personalBest(request.getPersonalBest())
@@ -36,7 +40,7 @@ public class AthleteMapper {
                 .id(athlete.getId())
                 .firstName(athlete.getFirstName())
                 .lastName(athlete.getLastName())
-                .birthTimestamp(athlete.getBirthTimestamp())
+                .birthDate(toLocalDate(athlete.getBirthTimestamp()))
                 .nationality(athlete.getNationality())
                 .discipline(athlete.getDiscipline())
                 .personalBest(athlete.getPersonalBest())
@@ -53,10 +57,36 @@ public class AthleteMapper {
     public static void updateFromRequest(final Athlete athlete, final AthleteRequest request) {
         athlete.setFirstName(request.getFirstName());
         athlete.setLastName(request.getLastName());
-        athlete.setBirthTimestamp(request.getBirthTimestamp());
+        athlete.setBirthTimestamp(toTimestamp(request.getBirthDate()));
         athlete.setNationality(request.getNationality());
         athlete.setDiscipline(request.getDiscipline());
         athlete.setPersonalBest(request.getPersonalBest());
         athlete.setBio(request.getBio());
+    }
+
+    /**
+     * Converts LocalDate to epoch milliseconds timestamp.
+     *
+     * @param date the LocalDate to convert
+     * @return epoch milliseconds, or null if date is null
+     */
+    private static Long toTimestamp(final LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        return date.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli();
+    }
+
+    /**
+     * Converts epoch milliseconds timestamp to LocalDate.
+     *
+     * @param timestamp the epoch milliseconds to convert
+     * @return LocalDate in UTC, or null if timestamp is null
+     */
+    private static LocalDate toLocalDate(final Long timestamp) {
+        if (timestamp == null) {
+            return null;
+        }
+        return Instant.ofEpochMilli(timestamp).atZone(ZoneId.of("UTC")).toLocalDate();
     }
 }

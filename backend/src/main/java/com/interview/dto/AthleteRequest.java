@@ -2,8 +2,9 @@ package com.interview.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,9 +26,9 @@ public class AthleteRequest {
     @Size(max = 30, message = "Last name must not exceed 30 characters")
     private String lastName;
 
-    @NotNull(message = "Birth timestamp is required")
-    @Positive(message = "Birth timestamp must be a positive number")
-    private Long birthTimestamp;
+    @NotNull(message = "Birth date is required")
+    @PastOrPresent(message = "Birth date must be in the past or present")
+    private LocalDate birthDate;
 
     @NotBlank(message = "Nationality is required")
     @Size(max = 50, message = "Nationality must not exceed 50 characters")

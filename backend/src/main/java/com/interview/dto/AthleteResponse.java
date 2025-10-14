@@ -1,5 +1,6 @@
 package com.interview.dto;
 
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,7 @@ public class AthleteResponse {
     private Long id;
     private String firstName;
     private String lastName;
-    private Long birthTimestamp;
+    private LocalDate birthDate;
     private String nationality;
     private String discipline;
     private String personalBest;

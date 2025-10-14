@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import java.time.LocalDate;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +23,8 @@ class AthleteRequestTest {
 
     @Test
     void shouldCreateValidAthleteRequest() {
-        AthleteRequest request =
-                new AthleteRequest("John", "Doe", 1000000000L, "USA", "100m Sprint", "9.99s", "Fast runner");
+        AthleteRequest request = new AthleteRequest(
+                "John", "Doe", LocalDate.of(1990, 1, 1), "USA", "100m Sprint", "9.99s", "Fast runner");
 
         Set<ConstraintViolation<AthleteRequest>> violations = validator.validate(request);
 
@@ -33,7 +34,7 @@ class AthleteRequestTest {
     @Test
     void shouldFailWhenFirstNameIsBlank() {
         AthleteRequest request =
-                new AthleteRequest("", "Doe", 1000000000L, "USA", "100m Sprint", "9.99s", "Fast runner");
+                new AthleteRequest("", "Doe", LocalDate.of(1990, 1, 1), "USA", "100m Sprint", "9.99s", "Fast runner");
 
         Set<ConstraintViolation<AthleteRequest>> violations = validator.validate(request);
 
@@ -44,7 +45,7 @@ class AthleteRequestTest {
     @Test
     void shouldFailWhenLastNameIsBlank() {
         AthleteRequest request =
-                new AthleteRequest("John", "", 1000000000L, "USA", "100m Sprint", "9.99s", "Fast runner");
+                new AthleteRequest("John", "", LocalDate.of(1990, 1, 1), "USA", "100m Sprint", "9.99s", "Fast runner");
 
         Set<ConstraintViolation<AthleteRequest>> violations = validator.validate(request);
 
@@ -53,23 +54,34 @@ class AthleteRequestTest {
     }
 
     @Test
-    void shouldFailWhenBirthTimestampIsNull() {
+    void shouldFailWhenBirthDateIsNull() {
         AthleteRequest request = new AthleteRequest("John", "Doe", null, "USA", "100m Sprint", "9.99s", "Fast runner");
 
         Set<ConstraintViolation<AthleteRequest>> violations = validator.validate(request);
 
         assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).isEqualTo("Birth timestamp is required");
+        assertThat(violations.iterator().next().getMessage()).isEqualTo("Birth date is required");
     }
 
     @Test
-    void shouldFailWhenBirthTimestampIsNegative() {
-        AthleteRequest request = new AthleteRequest("John", "Doe", -1L, "USA", "100m Sprint", "9.99s", "Fast runner");
+    void shouldFailWhenBirthDateIsInFuture() {
+        AthleteRequest request = new AthleteRequest(
+                "John", "Doe", LocalDate.now().plusDays(1), "USA", "100m Sprint", "9.99s", "Fast runner");
 
         Set<ConstraintViolation<AthleteRequest>> violations = validator.validate(request);
 
         assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).isEqualTo("Birth timestamp must be a positive number");
+        assertThat(violations.iterator().next().getMessage()).isEqualTo("Birth date must be in the past or present");
+    }
+
+    @Test
+    void shouldAllowTodayAsBirthDate() {
+        AthleteRequest request =
+                new AthleteRequest("John", "Doe", LocalDate.now(), "USA", "100m Sprint", "9.99s", "Fast runner");
+
+        Set<ConstraintViolation<AthleteRequest>> violations = validator.validate(request);
+
+        assertThat(violations).isEmpty();
     }
 
     @Test
@@ -77,7 +89,7 @@ class AthleteRequestTest {
         AthleteRequest request = new AthleteRequest(
                 "ThisNameIsWayTooLongAndExceedsTheThirtyCharacterLimit",
                 "Doe",
-                1000000000L,
+                LocalDate.of(1990, 1, 1),
                 "USA",
                 "100m Sprint",
                 "9.99s",
@@ -91,7 +103,8 @@ class AthleteRequestTest {
 
     @Test
     void shouldAllowNullPersonalBest() {
-        AthleteRequest request = new AthleteRequest("John", "Doe", 1000000000L, "USA", "100m Sprint", null, "Bio");
+        AthleteRequest request =
+                new AthleteRequest("John", "Doe", LocalDate.of(1990, 1, 1), "USA", "100m Sprint", null, "Bio");
 
         Set<ConstraintViolation<AthleteRequest>> violations = validator.validate(request);
 
@@ -100,7 +113,8 @@ class AthleteRequestTest {
 
     @Test
     void shouldAllowNullBio() {
-        AthleteRequest request = new AthleteRequest("John", "Doe", 1000000000L, "USA", "100m Sprint", "9.99s", null);
+        AthleteRequest request =
+                new AthleteRequest("John", "Doe", LocalDate.of(1990, 1, 1), "USA", "100m Sprint", "9.99s", null);
 
         Set<ConstraintViolation<AthleteRequest>> violations = validator.validate(request);
 
