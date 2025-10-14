@@ -79,7 +79,8 @@ public class AthleteController {
 
         // Validate sort field
         final String sortField = ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : DEFAULT_SORT_FIELD;
-        final Sort.Direction sortDirection = direction.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        final Sort.Direction sortDirection =
+                direction.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
 
         final Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortField));
         final Page<Athlete> athletePage = service.findAll(spec, pageable);
@@ -111,7 +112,8 @@ public class AthleteController {
     @ApiResponse(responseCode = "400", description = "Invalid athlete data")
     @ApiResponse(responseCode = "404", description = "Athlete not found")
     @PutMapping("/{id}")
-    public ResponseEntity<AthleteResponse> updateAthlete(@PathVariable Long id, @Valid @RequestBody AthleteRequest request) {
+    public ResponseEntity<AthleteResponse> updateAthlete(
+            @PathVariable Long id, @Valid @RequestBody AthleteRequest request) {
         final Athlete existing = service.findById(id); // May throw AthleteNotFoundException
         AthleteMapper.updateFromRequest(existing, request);
         final Athlete updated = service.save(existing);

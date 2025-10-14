@@ -23,4 +23,3 @@ public class AthleteResponse {
     private String personalBest;
     private String bio;
 }
-
