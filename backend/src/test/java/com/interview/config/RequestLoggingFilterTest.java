@@ -7,6 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.interview.model.Athlete;
 import com.interview.service.AthleteService;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +48,21 @@ class RequestLoggingFilterTest {
         @Bean
         public RequestLoggingFilter requestLoggingFilter() {
             return new RequestLoggingFilter();
+        }
+
+        @Bean
+        public RateLimitProperties rateLimitProperties() {
+            return new RateLimitProperties();
+        }
+
+        @Bean
+        public Bucket rateLimitBucket() {
+            return Bucket.builder()
+                    .addLimit(Bandwidth.builder()
+                            .capacity(1000)
+                            .refillIntervally(1000, Duration.ofMinutes(1))
+                            .build())
+                    .build();
         }
     }
 
