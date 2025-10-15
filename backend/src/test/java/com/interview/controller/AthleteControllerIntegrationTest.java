@@ -6,7 +6,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interview.dto.AthleteRequest;
+import com.interview.repository.AthleteRepository;
 import java.time.LocalDate;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,6 +28,9 @@ class AthleteControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private AthleteRepository athleteRepository;
+
     /**
      * Helper method to build URL for athlete resource by ID.
      *
@@ -34,6 +39,14 @@ class AthleteControllerIntegrationTest {
      */
     private String athleteUrl(Long id) {
         return ATHLETES_BASE_URL + "/" + id;
+    }
+
+    /**
+     * Clean up the database before each test to ensure test isolation.
+     */
+    @BeforeEach
+    void setUp() {
+        athleteRepository.deleteAll();
     }
 
     @Test
