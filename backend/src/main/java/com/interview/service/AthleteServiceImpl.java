@@ -1,6 +1,7 @@
 package com.interview.service;
 
 import com.interview.exception.AthleteNotFoundException;
+import com.interview.exception.DuplicateAthleteException;
 import com.interview.model.Athlete;
 import com.interview.repository.AthleteRepository;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -57,10 +59,19 @@ public class AthleteServiceImpl implements AthleteService {
     }
 
     @Override
+    @Transactional
     public Athlete save(final Athlete athlete) {
         final boolean isNewAthlete = athlete.getId() == null;
+
         if (isNewAthlete) {
             log.debug("Creating new athlete: {} {}", athlete.getFirstName(), athlete.getLastName());
+
+            // Check for duplicates when creating new athlete
+            if (repository.existsByFirstNameAndLastNameAndBirthTimestamp(
+                    athlete.getFirstName(), athlete.getLastName(), athlete.getBirthTimestamp())) {
+                log.warn("Attempted to create duplicate athlete: {} {}", athlete.getFirstName(), athlete.getLastName());
+                throw new DuplicateAthleteException(athlete.getFirstName(), athlete.getLastName());
+            }
         } else {
             log.debug("Updating athlete with id: {}", athlete.getId());
         }
@@ -78,6 +89,7 @@ public class AthleteServiceImpl implements AthleteService {
     }
 
     @Override
+    @Transactional
     public void deleteById(final Long id) {
         log.debug("Attempting to delete athlete with id: {}", id);
         if (repository.existsById(id)) {

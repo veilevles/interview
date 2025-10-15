@@ -22,6 +22,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -98,13 +99,14 @@ public class AthleteController {
     }
 
     @Operation(summary = "Create a new athlete", description = "Creates a new athlete with the provided data")
-    @ApiResponse(responseCode = "200", description = "Athlete created successfully")
+    @ApiResponse(responseCode = "201", description = "Athlete created successfully")
     @ApiResponse(responseCode = "400", description = "Invalid athlete data")
+    @ApiResponse(responseCode = "409", description = "Athlete already exists")
     @PostMapping
-    public ResponseEntity<AthleteResponse> createAthlete(@Valid @RequestBody AthleteRequest request) {
+    public ResponseEntity<AthleteResponse> createAthlete(@Valid @RequestBody final AthleteRequest request) {
         final Athlete athlete = AthleteMapper.toDomain(request);
         final Athlete saved = service.save(athlete);
-        return ResponseEntity.ok(AthleteMapper.toResponse(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(AthleteMapper.toResponse(saved));
     }
 
     @Operation(summary = "Update an athlete", description = "Updates an existing athlete with the provided data")
