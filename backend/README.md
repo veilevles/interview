@@ -312,6 +312,29 @@ docker-compose up
 - **AssertJ** - Fluent assertions
 - **Spotless** - Code formatting
 
+## 🚀 Future Enhancements & Production Considerations
+
+Key improvements for production deployment:
+
+### 🔐 Security
+- Add Spring Security with JWT-based authentication
+- Require authentication for CREATE/UPDATE/DELETE operations
+- Implement per-user rate limiting
+
+### 🗄️ Database
+- Migrate from H2 to PostgreSQL or MySQL
+- Add Flyway for database schema migrations
+
+### 📊 Monitoring
+- Add Prometheus metrics endpoint
+- Set up Grafana dashboards for monitoring
+- Implement structured logging for better observability
+
+### 🐳 Deployment
+- Create Helm charts for Kubernetes deployment
+- Add health check endpoints for liveness/readiness probes
+- Configure environment-specific properties
+
 ## 🔗 Additional Resources
 
 - [Original Task Description](./ORIGINAL-TASK-DESCRIPTION.md) - Original coding exercise requirements
