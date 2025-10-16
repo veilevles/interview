@@ -2,7 +2,6 @@ package com.interview.controller.advice;
 
 import com.interview.exception.AthleteNotFoundException;
 import com.interview.exception.DuplicateAthleteException;
-import com.interview.exception.InvalidAthleteDataException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,12 +30,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleNotFound(final AthleteNotFoundException ex) {
         log.warn("Resource not found: {}", ex.getMessage());
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(InvalidAthleteDataException.class)
-    public ResponseEntity<Object> handleInvalidData(final InvalidAthleteDataException ex) {
-        log.warn("Invalid data received: {}", ex.getMessage());
-        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DuplicateAthleteException.class)
