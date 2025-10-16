@@ -1,3 +1,8 @@
+-- Create indexes for frequently queried fields to improve performance
+CREATE INDEX IF NOT EXISTS idx_athlete_nationality ON athlete(nationality);
+CREATE INDEX IF NOT EXISTS idx_athlete_discipline ON athlete(discipline);
+CREATE INDEX IF NOT EXISTS idx_athlete_duplicate_check ON athlete(first_name, last_name, birth_timestamp);
+
 -- Insert sample athlete data
 INSERT INTO athlete (first_name, last_name, birth_timestamp, nationality, discipline, personal_best, bio) VALUES
 -- Sprinters
